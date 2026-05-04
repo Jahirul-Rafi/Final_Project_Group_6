@@ -12,27 +12,27 @@ raw <- read_csv("data/ethanol2_3_5Bleach50_100_200ppm_PQ50_100_150uM_D74D105_ex3
 #Growth Curve for A909, A909 D74, A909 D105 Treated with Bleach with concenration of untreated, 50ppm, 100ppm, 200ppm with 3 replicate.
 #Read + extract
 time_row <- 26
-dat <- raw[(time_row +1):nrow(raw), 2:39]
-colnames(dat) <- as.character(raw[time_row, 2:39])
-dat <- dat[complete.cases(dat[[1]]),]
+dat_bleach <- raw[(time_row +1):nrow(raw), 2:39]
+colnames(dat_bleach) <- as.character(raw[time_row, 2:39])
+dat_bleach <- dat_bleach[complete.cases(dat_bleach[[1]]),]
 
 
 
 #Convert wells to numeric
-colnames(dat)[1:38] <- c("time", "Temperature","A1","A2","A3","A4","A5","A6","A7","A8","A9","A10","A11","A12","B1","B2","B3","B4","B5","B6","B7","B8","B9","B10","B11","B12","C1","C2","C3","C4","C5","C6","C7","C8","C9","C10","C11","C12")
-well_cols <- 3:ncol(dat)
-dat[well_cols] <- lapply(dat[well_cols], function (x) as.numeric(as.character(x)))
+colnames(dat_bleach)[1:38] <- c("time", "Temperature","A1","A2","A3","A4","A5","A6","A7","A8","A9","A10","A11","A12","B1","B2","B3","B4","B5","B6","B7","B8","B9","B10","B11","B12","C1","C2","C3","C4","C5","C6","C7","C8","C9","C10","C11","C12")
+well_cols <- 3:ncol(dat_bleach)
+dat_bleach[well_cols] <- lapply(dat_bleach[well_cols], function (x) as.numeric(as.character(x)))
 
 #Convert the data into Long format
-dat_long <- dat %>%
+dat_long_bleach <- dat_bleach %>%
   pivot_longer(
-    cols = 3:ncol(dat),   # all well columns
+    cols = 3:ncol(dat_bleach),   # all well columns
     names_to = "Well",
     values_to = "OD"
   )
 
 #Designate the Conditions and Replicates
-dat_long <- dat_long %>%
+dat_long_bleach <- dat_long_bleach %>%
   mutate(
     Condition = case_when(
       Well %in% c("A1","A2","A3") ~ "A909_un",
@@ -67,16 +67,16 @@ dat_long <- dat_long %>%
 
 #Convert the time into hours
 
-dat_long <- dat_long |>
+dat_long_bleach <- dat_long_bleach |>
   mutate(
     time_hours = as.numeric(hms::as_hms(time)) / 3600
   )
-dat_long <- dat_long |>
+dat_long_bleach <- dat_long_bleach |>
   filter(!is.na(time_hours))
 
 #Data summaries
 
-summary_data <- dat_long %>%
+summary_data_bleach <- dat_long_bleach %>%
   group_by(time_hours, Condition) %>%
   summarise(
     mean_OD = mean(OD, na.rm = TRUE),
@@ -90,14 +90,14 @@ summary_data <- dat_long %>%
 
 # Plot 1: Growth curves of A909 in Bleach Treatment
 
-ggplot(summary_data, aes(x = time_hours, y = mean_OD, color = Condition)) +
+ggplot(summary_data_bleach, aes(x = time_hours, y = mean_OD, color = Condition)) +
   geom_line(size = 1.2) +
   geom_ribbon(aes(ymin = mean_OD - se_OD, ymax = mean_OD + se_OD, fill = Condition),
-              alpha = 0.2, color = NA) +
+              alpha = 0.09, color = NA) +
   theme_classic() +
   labs(
-    title = "GBS Growth Curve",
-    x = "Time (hours)",
+    title = "Group B Streptococcus Growth Curve Treatment with Bleach",
+    x = "Time (hr)",
     y = "OD600"
   )
  
