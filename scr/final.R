@@ -11,19 +11,21 @@ raw <- read_csv("data/ethanol2_3_5Bleach50_100_200ppm_PQ50_100_150uM_D74D105_ex3
 
 # Extract data
 time_row <- 26
-dat <- raw[(time_row +1):nrow(raw), 2:66]
-colnames(dat) <- as.character(raw[time_row, 2:66])
+dat <- raw[(time_row +1):nrow(raw), 2:93]
+colnames(dat) <- as.character(raw[time_row, 2:93])
 dat <- dat[complete.cases(dat[[1]]),]
 
 # Rename wells
-colnames(dat)[1:76] <- c(
+colnames(dat)[1:92] <- c(
   "time", "Temperature",
   "A1","A2","A3","A4","A5","A6","A7","A8","A9","A10","A11","A12",
   "B1","B2","B3","B4","B5","B6","B7","B8","B9","B10","B11","B12",
   "C1","C2","C3","C4","C5","C6","C7","C8","C9","C10","C11","C12",
   "D4","D5","D6","D7","D8","D9","D10","D11","D12",
   "E4","E5","E6","E7","E8","E9","E10","E11","E12",
-  "F4","F5","F6","F7","F8","F9","F10","F11","F12"
+  "F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12",
+  "G1","G2","G3","G4","G5","G6","G7","G8","G9","G10","G11","G12",
+  "H1","H2","H3","H4","H5","H6","H7","H8","H9","H10","H11","H12"
 )
 
 # Convert wells to numeric
@@ -31,7 +33,7 @@ well_cols <- 3:ncol(dat)
 dat[well_cols] <- lapply(dat[well_cols], function (x) as.numeric(as.character(x)))
 
 # Long format
-dat_long <- dat %>%
+dat_long_bleach <- dat %>%
   pivot_longer(
     cols = 3:ncol(dat),
     names_to = "Well",
@@ -39,7 +41,7 @@ dat_long <- dat %>%
   )
 
 # BLEACH
-dat_long <- dat_long %>%
+dat_long_bleach <- dat_long_bleach %>%
   mutate(
     Condition = case_when(
       Well %in% c("A1","A2","A3") ~ "A909_un",
@@ -68,17 +70,17 @@ dat_long <- dat_long %>%
       Well %in% c("C3","C6","C9","C12") ~ "R9",
       TRUE ~ NA_character_
     )
-  ) %>%
+  ) |>
   filter(!is.na(Condition))
 
 # Convert time (BLEACH)
-dat_long <- dat_long %>%
-  mutate(time_hours = as.numeric(hms::as_hms(time)) / 3600) %>%
+dat_long_bleach <- dat_long_bleach |>
+  mutate(time_hours = as.numeric(hms::as_hms(time)) / 3600) |>
   filter(!is.na(time_hours))
 
 # Summary (BLEACH)
-summary_data <- dat_long %>%
-  group_by(time_hours, Condition) %>%
+summary_data_bleach <- dat_long_bleach |>
+  group_by(time_hours, Condition) |>
   summarise(
     mean_OD = mean(OD, na.rm = TRUE),
     sd_OD   = sd(OD, na.rm = TRUE),
@@ -88,10 +90,10 @@ summary_data <- dat_long %>%
   )
 
 # Plot 1 (BLEACH)
-ggplot(summary_data, aes(x = time_hours, y = mean_OD, color = Condition)) +
+ggplot(summary_data_bleach, aes(x = time_hours, y = mean_OD, color = Condition)) +
   geom_line(size = 1.2) +
   geom_ribbon(aes(ymin = mean_OD - se_OD, ymax = mean_OD + se_OD, fill = Condition),
-              alpha = 0.2, color = NA) +
+              alpha = 0.09, color = NA) +
   theme_classic() +
   labs(
     title = "GBS Growth Curve (Bleach)",
