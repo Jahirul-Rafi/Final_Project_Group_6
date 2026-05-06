@@ -107,14 +107,17 @@ ggsave("figure/Bleach_Treatment_Growth_Curve.png", width = 6, height = 4, dpi = 
 dat_long_ethanol <- dat_long %>%
   mutate(
     Condition = case_when(
+      Well %in% c("A1","A2","A3") ~ "A909_un",
       Well %in% c("D4","D5","D6") ~ "A909_2%",
       Well %in% c("D7","D8","D9") ~ "A909_3%",
       Well %in% c("D10","D11","D12") ~ "A909_5%",
       
+      Well %in% c("B1","B2","B3") ~ "A909_D75_un",
       Well %in% c("E4","E5","E6") ~ "A909_D74_2%",
       Well %in% c("E7","E8","E9") ~ "A909_D74_3%",
       Well %in% c("E10","E11","E12") ~ "A909_D74_5%",
       
+      Well %in% c("C1","C2","C3") ~ "A909_D105_un",
       Well %in% c("F1","F2","F3") ~ "A909_D105_2%",
       Well %in% c("F4","F5","F6") ~ "A909_D105_3%",
       Well %in% c("F7","F8","F9") ~ "A909_D105_5%",
@@ -122,15 +125,15 @@ dat_long_ethanol <- dat_long %>%
       TRUE ~ NA_character_
     ),
      Replicate = case_when(
-      Well %in% c("D4","D7","D10") ~ "R1",
-      Well %in% c("E4","E7","E10") ~ "R2",
-      Well %in% c("F1","F4","F7") ~ "R3",
-      Well %in% c("D5","D8","D6") ~ "R4",
-      Well %in% c("E5","E8","E11") ~ "R5",
-      Well %in% c("F2","F5","F8") ~ "R6",
-      Well %in% c("D6","D9","D12") ~ "R7",
-      Well %in% c("E6","E9","E12") ~ "R8",
-      Well %in% c("F3","F6","F9") ~ "R9",
+      Well %in% c("A1","D4","D7","D10") ~ "R1",
+      Well %in% c("B1","E4","E7","E10") ~ "R2",
+      Well %in% c("C1","F1","F4","F7") ~ "R3",
+      Well %in% c("A2","D5","D8","D6") ~ "R4",
+      Well %in% c("B2","E5","E8","E11") ~ "R5",
+      Well %in% c("C2","F2","F5","F8") ~ "R6",
+      Well %in% c("A3","D6","D9","D12") ~ "R7",
+      Well %in% c("B3","E6","E9","E12") ~ "R8",
+      Well %in% c("C3","F3","F6","F9") ~ "R9",
       TRUE ~ NA_character_
     )
   ) |>
@@ -170,14 +173,17 @@ ggsave("figure/Ethanol_Treatment_Growth_Curve.png", width = 6, height = 4, dpi =
 dat_long_pq <- dat_long %>%
   mutate(
     Condition = case_when(
+      Well %in% c("A1","A2","A3") ~ "A909_un",
       Well %in% c("F10","F11","F12") ~ "A909_50PQ",
       Well %in% c("G1","G2","G3") ~ "A909_100PQ",
       Well %in% c("G4","G5","G6") ~ "A909_150PQ",
       
+      Well %in% c("B1","B2","B3") ~ "A909_D75_un",
       Well %in% c("G7","G8","G9") ~ "A909_D74_50PQ",
       Well %in% c("G10","G11","G12") ~ "A909_D74_100PQ",
       Well %in% c("H1","H2","H3") ~ "A909_D74_150PQ",
       
+      Well %in% c("C1","C2","C3") ~ "A909_D105_un",
       Well %in% c("H4","H5","H6") ~ "A909_D105_50PQ",
       Well %in% c("H7","H8","H9") ~ "A909_D105_100PQ",
       Well %in% c("H10","H11","H12") ~ "A909_D105_150PQ",
@@ -185,15 +191,15 @@ dat_long_pq <- dat_long %>%
       TRUE ~ NA_character_
     ),
     Replicate = case_when(
-      Well %in% c("F10","G1","G4") ~ "R1",
-      Well %in% c("F11","G2","G5") ~ "R2",
-      Well %in% c("F12","G3","G6") ~ "R3",
-      Well %in% c("G7","G10","H1") ~ "R4",
-      Well %in% c("G8","G11","H2") ~ "R5",
-      Well %in% c("G9","G12","H3") ~ "R6",
-      Well %in% c("H4","H5","H6") ~ "R7",
-      Well %in% c("H7","H8","H9") ~ "R8",
-      Well %in% c("H10","H11","H12") ~ "R9",
+      Well %in% c("A1","F10","G1","G4") ~ "R1",
+      Well %in% c("B1","F11","G2","G5") ~ "R2",
+      Well %in% c("C1","F12","G3","G6") ~ "R3",
+      Well %in% c("A2","G7","G10","H1") ~ "R4",
+      Well %in% c("B2","G8","G11","H2") ~ "R5",
+      Well %in% c("C2","G9","G12","H3") ~ "R6",
+      Well %in% c("A3","H4","H5","H6") ~ "R7",
+      Well %in% c("B3","H7","H8","H9") ~ "R8",
+      Well %in% c("C3","H10","H11","H12") ~ "R9",
       TRUE ~ NA_character_
     )
   ) |>
