@@ -136,7 +136,7 @@ dat_long_ethanol <- dat_long %>%
   ) |>
   filter(!is.na(Condition))
 
-# Convert time (BLEACH)
+# Convert time (Ethanol)
 dat_long_ethanol <- dat_long_ethanol |>
   mutate(time_hours = as.numeric(hms::as_hms(time)) / 3600) |>
   filter(!is.na(time_hours))
@@ -156,7 +156,7 @@ summary_ethanol <- dat_long_ethanol %>%
 ggplot(summary_ethanol, aes(x = time_hours, y = mean_OD, color = Condition)) +
   geom_line(size = 1.2) +
   geom_ribbon(aes(ymin = mean_OD - se_OD, ymax = mean_OD + se_OD, fill = Condition),
-              alpha = 0.2, color = NA) +
+              alpha = 0.09, color = NA) +
   theme_classic() +
   labs(
     title = "GBS Ethanol Growth Curve",
@@ -170,24 +170,38 @@ ggsave("figure/Ethanol_Treatment_Growth_Curve.png", width = 6, height = 4, dpi =
 dat_long_pq <- dat_long %>%
   mutate(
     Condition = case_when(
-      # F-row equivalent of ethanol-style grouping
-      Well %in% c("A1","A2","A3") ~ "A909_50PQ",
-      Well %in% c("A4","A5","A6") ~ "A909_100PQ",
-      Well %in% c("A7","A8","A9") ~ "A909_150PQ",
+      Well %in% c("F10","F11","F12") ~ "A909_50PQ",
+      Well %in% c("G1","G2","G3") ~ "A909_100PQ",
+      Well %in% c("G4","G5","G6") ~ "A909_150PQ",
       
-      Well %in% c("B1","B2","B3") ~ "A909_D74_50PQ",
-      Well %in% c("B4","B5","B6") ~ "A909_D74_100PQ",
-      Well %in% c("B7","B8","B9") ~ "A909_D74_150PQ",
+      Well %in% c("G7","G8","G9") ~ "A909_D74_50PQ",
+      Well %in% c("G10","G11","G12") ~ "A909_D74_100PQ",
+      Well %in% c("H1","H2","H3") ~ "A909_D74_150PQ",
       
-      Well %in% c("C1","C2","C3") ~ "A909_D105_50PQ",
-      Well %in% c("C4","C5","C6") ~ "A909_D105_100PQ",
-      Well %in% c("C7","C8","C9") ~ "A909_D105_150PQ",
+      Well %in% c("H4","H5","H6") ~ "A909_D105_50PQ",
+      Well %in% c("H7","H8","H9") ~ "A909_D105_100PQ",
+      Well %in% c("H10","H11","H12") ~ "A909_D105_150PQ",
       
       TRUE ~ NA_character_
+    ),
+    Replicate = case_when(
+      Well %in% c("F10","G1","G4") ~ "R1",
+      Well %in% c("F11","G2","G5") ~ "R2",
+      Well %in% c("F12","G3","G6") ~ "R3",
+      Well %in% c("G7","G10","H1") ~ "R4",
+      Well %in% c("G8","G11","H2") ~ "R5",
+      Well %in% c("G9","G12","H3") ~ "R6",
+      Well %in% c("H4","H5","H6") ~ "R7",
+      Well %in% c("H7","H8","H9") ~ "R8",
+      Well %in% c("H10","H11","H12") ~ "R9",
+      TRUE ~ NA_character_
     )
-  ) %>%
-  filter(!is.na(Condition)) %>%
-  mutate(time_hours = as.numeric(hms::as_hms(time)) / 3600) %>%
+  ) |>
+  filter(!is.na(Condition))
+
+# Convert time (Ethanol)
+dat_long_pq <- dat_long_pq |>
+  mutate(time_hours = as.numeric(hms::as_hms(time)) / 3600) |>
   filter(!is.na(time_hours))
 
 # Summary
@@ -206,7 +220,7 @@ ggplot(summary_pq, aes(x = time_hours, y = mean_OD, color = Condition)) +
   geom_line(size = 1.2) +
   geom_ribbon(
     aes(ymin = mean_OD - se_OD, ymax = mean_OD + se_OD, fill = Condition),
-    alpha = 0.2, color = NA
+    alpha = 0.09, color = NA
   ) +
   theme_classic() +
   labs(
