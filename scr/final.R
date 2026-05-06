@@ -264,4 +264,4 @@ ggplot(combined_summary, aes(x = time_hours, y = mean_OD, color = Condition)) +
     x = "Time (hours)",
     y = "OD600"
   )
-ggsave("figure/Combined.png", width = 6, height = 4, dpi = 1200)
+ggsave("figure/Combined.png", width = 18, height = 4, dpi = 1200)
