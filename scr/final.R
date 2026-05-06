@@ -6,33 +6,40 @@ library(stringr)
 library(ggplot2)
 library(hms)
 
-#Read CSV
+# Read CSV
 raw <- read_csv("data/ethanol2_3_5Bleach50_100_200ppm_PQ50_100_150uM_D74D105_ex3.csv")
 
-#Growth Curve for A909, A909 D74, A909 D105 Treated with Bleach with concenration of untreated, 50ppm, 100ppm, 200ppm with 3 replicate.
-#Read + extract
+# Extract data
 time_row <- 26
-dat_bleach <- raw[(time_row +1):nrow(raw), 2:39]
-colnames(dat_bleach) <- as.character(raw[time_row, 2:39])
-dat_bleach <- dat_bleach[complete.cases(dat_bleach[[1]]),]
+dat <- raw[(time_row +1):nrow(raw), 2:66]
+colnames(dat) <- as.character(raw[time_row, 2:66])
+dat <- dat[complete.cases(dat[[1]]),]
 
+# Rename wells
+colnames(dat)[1:76] <- c(
+  "time", "Temperature",
+  "A1","A2","A3","A4","A5","A6","A7","A8","A9","A10","A11","A12",
+  "B1","B2","B3","B4","B5","B6","B7","B8","B9","B10","B11","B12",
+  "C1","C2","C3","C4","C5","C6","C7","C8","C9","C10","C11","C12",
+  "D4","D5","D6","D7","D8","D9","D10","D11","D12",
+  "E4","E5","E6","E7","E8","E9","E10","E11","E12",
+  "F4","F5","F6","F7","F8","F9","F10","F11","F12"
+)
 
+# Convert wells to numeric
+well_cols <- 3:ncol(dat)
+dat[well_cols] <- lapply(dat[well_cols], function (x) as.numeric(as.character(x)))
 
-#Convert wells to numeric
-colnames(dat_bleach)[1:38] <- c("time", "Temperature","A1","A2","A3","A4","A5","A6","A7","A8","A9","A10","A11","A12","B1","B2","B3","B4","B5","B6","B7","B8","B9","B10","B11","B12","C1","C2","C3","C4","C5","C6","C7","C8","C9","C10","C11","C12")
-well_cols <- 3:ncol(dat_bleach)
-dat_bleach[well_cols] <- lapply(dat_bleach[well_cols], function (x) as.numeric(as.character(x)))
-
-#Convert the data into Long format
-dat_long_bleach <- dat_bleach %>%
+# Long format
+dat_long <- dat %>%
   pivot_longer(
-    cols = 3:ncol(dat_bleach),   # all well columns
+    cols = 3:ncol(dat),
     names_to = "Well",
     values_to = "OD"
   )
 
-#Designate the Conditions and Replicates
-dat_long_bleach <- dat_long_bleach %>%
+# BLEACH
+dat_long <- dat_long %>%
   mutate(
     Condition = case_when(
       Well %in% c("A1","A2","A3") ~ "A909_un",
@@ -64,19 +71,13 @@ dat_long_bleach <- dat_long_bleach %>%
   ) %>%
   filter(!is.na(Condition))
 
-
-#Convert the time into hours
-
-dat_long_bleach <- dat_long_bleach |>
-  mutate(
-    time_hours = as.numeric(hms::as_hms(time)) / 3600
-  )
-dat_long_bleach <- dat_long_bleach |>
+# Convert time (BLEACH)
+dat_long <- dat_long %>%
+  mutate(time_hours = as.numeric(hms::as_hms(time)) / 3600) %>%
   filter(!is.na(time_hours))
 
-#Data summaries
-
-summary_data_bleach <- dat_long_bleach %>%
+# Summary (BLEACH)
+summary_data <- dat_long %>%
   group_by(time_hours, Condition) %>%
   summarise(
     mean_OD = mean(OD, na.rm = TRUE),
@@ -84,45 +85,119 @@ summary_data_bleach <- dat_long_bleach %>%
     n       = sum(!is.na(OD)),
     se_OD   = sd_OD / sqrt(n),
     .groups = "drop"
-  ) %>%
-  filter(!is.na(time_hours))
-#VISUALIZATIONS
+  )
 
-# Plot 1: Growth curves of A909 in Bleach Treatment
-
-ggplot(summary_data_bleach, aes(x = time_hours, y = mean_OD, color = Condition)) +
+# Plot 1 (BLEACH)
+ggplot(summary_data, aes(x = time_hours, y = mean_OD, color = Condition)) +
   geom_line(size = 1.2) +
   geom_ribbon(aes(ymin = mean_OD - se_OD, ymax = mean_OD + se_OD, fill = Condition),
-              alpha = 0.09, color = NA) +
+              alpha = 0.2, color = NA) +
   theme_classic() +
   labs(
-    title = "Group B Streptococcus Growth Curve Treatment with Bleach",
-    x = "Time (hr)",
+    title = "GBS Growth Curve (Bleach)",
+    x = "Time (hours)",
     y = "OD600"
   )
- 
 
-# Plot 2: Final OD comparison
-final_time <- max(summary_data$time_hours, na.rm = TRUE)
+ggsave("figure/Bleach_Treatment_Growth_Curve.png", width = 6, height = 4, dpi = 1200)
 
-plot2 <- summary_data %>%
-  filter(time_hours == final_time) %>%
-  ggplot(aes(x = treatment, y = mean_abs, fill = strain)) +
-  geom_col(position = "dodge") +
-  facet_wrap(~ day) +
-  theme_minimal() +
-  labs(
-    title = "Final Optical Density by Treatment and Day",
-    y = "Final OD"
+# ETHANOL ANALYSIS
+dat_long_ethanol <- dat_long %>%
+  mutate(
+    Condition = case_when(
+      Well %in% c("A1","A2","A3") ~ "A909_2%",
+      Well %in% c("A4","A5","A6") ~ "A909_3%",
+      Well %in% c("A7","A8","A9") ~ "A909_5%",
+      
+      Well %in% c("B1","B2","B3") ~ "A909_D74_2%",
+      Well %in% c("B4","B5","B6") ~ "A909_D74_3%",
+      Well %in% c("B7","B8","B9") ~ "A909_D74_5%",
+      
+      Well %in% c("C1","C2","C3") ~ "A909_D105_2%",
+      Well %in% c("C4","C5","C6") ~ "A909_D105_3%",
+      Well %in% c("C7","C8","C9") ~ "A909_D105_5%",
+      
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  filter(!is.na(Condition)) %>%
+  mutate(time_hours = as.numeric(hms::as_hms(time)) / 3600) %>%
+  filter(!is.na(time_hours))
+
+# summary
+summary_ethanol <- dat_long_ethanol %>%
+  group_by(time_hours, Condition) %>%
+  summarise(
+    mean_OD = mean(OD, na.rm = TRUE),
+    sd_OD   = sd(OD, na.rm = TRUE),
+    n       = sum(!is.na(OD)),
+    se_OD   = sd_OD / sqrt(n),
+    .groups = "drop"
   )
 
-# Plot 3: Desiccation effect
-plot3 <- summary_data %>%
-  filter(time_hours == final_time) %>%
-  ggplot(aes(x = day, y = mean_abs, fill = treatment)) +
-  geom_col(position = "dodge") +
-  theme_minimal() +
+# Plot 2 (ETHANOL)
+ggplot(summary_ethanol, aes(x = time_hours, y = mean_OD, color = Condition)) +
+  geom_line(size = 1.2) +
+  geom_ribbon(aes(ymin = mean_OD - se_OD, ymax = mean_OD + se_OD, fill = Condition),
+              alpha = 0.2, color = NA) +
+  theme_classic() +
   labs(
-    title = "Effect of Desiccation Duration on Survival",
-    y = "Final OD"
+    title = "GBS Ethanol Growth Curve",
+    x = "Time (hours)",
+    y = "OD600"
   )
+
+
+ggsave("figure/Ethanol_Treatment_Growth_Curve.png", width = 6, height = 4, dpi = 1200)
+
+#PQ ANALYSIS
+dat_long_pq <- dat_long %>%
+  mutate(
+    Condition = case_when(
+      # F-row equivalent of ethanol-style grouping
+      Well %in% c("A1","A2","A3") ~ "A909_50PQ",
+      Well %in% c("A4","A5","A6") ~ "A909_100PQ",
+      Well %in% c("A7","A8","A9") ~ "A909_150PQ",
+      
+      Well %in% c("B1","B2","B3") ~ "A909_D74_50PQ",
+      Well %in% c("B4","B5","B6") ~ "A909_D74_100PQ",
+      Well %in% c("B7","B8","B9") ~ "A909_D74_150PQ",
+      
+      Well %in% c("C1","C2","C3") ~ "A909_D105_50PQ",
+      Well %in% c("C4","C5","C6") ~ "A909_D105_100PQ",
+      Well %in% c("C7","C8","C9") ~ "A909_D105_150PQ",
+      
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  filter(!is.na(Condition)) %>%
+  mutate(time_hours = as.numeric(hms::as_hms(time)) / 3600) %>%
+  filter(!is.na(time_hours))
+
+# Summary
+summary_pq <- dat_long_pq %>%
+  group_by(time_hours, Condition) %>%
+  summarise(
+    mean_OD = mean(OD, na.rm = TRUE),
+    sd_OD   = sd(OD, na.rm = TRUE),
+    n       = sum(!is.na(OD)),
+    se_OD   = sd_OD / sqrt(n),
+    .groups = "drop"
+  )
+
+# Plot 3 (PQ)
+ggplot(summary_pq, aes(x = time_hours, y = mean_OD, color = Condition)) +
+  geom_line(size = 1.2) +
+  geom_ribbon(
+    aes(ymin = mean_OD - se_OD, ymax = mean_OD + se_OD, fill = Condition),
+    alpha = 0.2, color = NA
+  ) +
+  theme_classic() +
+  labs(
+    title = "GBS PQ Growth Curve",
+    x = "Time (hours)",
+    y = "OD600"
+  )
+
+
+ggsave("figure/PQ_Treatment_Growth_Curve.png", width = 6, height = 4, dpi = 1200)
