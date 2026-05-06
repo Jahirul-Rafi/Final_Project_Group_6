@@ -33,7 +33,7 @@ well_cols <- 3:ncol(dat)
 dat[well_cols] <- lapply(dat[well_cols], function (x) as.numeric(as.character(x)))
 
 # Long format
-dat_long_bleach <- dat %>%
+dat_long <- dat %>%
   pivot_longer(
     cols = 3:ncol(dat),
     names_to = "Well",
@@ -41,7 +41,7 @@ dat_long_bleach <- dat %>%
   )
 
 # BLEACH
-dat_long_bleach <- dat_long_bleach %>%
+dat_long_bleach <- dat_long |>
   mutate(
     Condition = case_when(
       Well %in% c("A1","A2","A3") ~ "A909_un",
@@ -107,23 +107,38 @@ ggsave("figure/Bleach_Treatment_Growth_Curve.png", width = 6, height = 4, dpi = 
 dat_long_ethanol <- dat_long %>%
   mutate(
     Condition = case_when(
-      Well %in% c("A1","A2","A3") ~ "A909_2%",
-      Well %in% c("A4","A5","A6") ~ "A909_3%",
-      Well %in% c("A7","A8","A9") ~ "A909_5%",
+      Well %in% c("D4","D5","D6") ~ "A909_2%",
+      Well %in% c("D7","D8","D9") ~ "A909_3%",
+      Well %in% c("D10","D11","D12") ~ "A909_5%",
       
-      Well %in% c("B1","B2","B3") ~ "A909_D74_2%",
-      Well %in% c("B4","B5","B6") ~ "A909_D74_3%",
-      Well %in% c("B7","B8","B9") ~ "A909_D74_5%",
+      Well %in% c("E4","E5","E6") ~ "A909_D74_2%",
+      Well %in% c("E7","E8","E9") ~ "A909_D74_3%",
+      Well %in% c("E10","E11","E12") ~ "A909_D74_5%",
       
-      Well %in% c("C1","C2","C3") ~ "A909_D105_2%",
-      Well %in% c("C4","C5","C6") ~ "A909_D105_3%",
-      Well %in% c("C7","C8","C9") ~ "A909_D105_5%",
+      Well %in% c("F1","F2","F3") ~ "A909_D105_2%",
+      Well %in% c("F4","F5","F6") ~ "A909_D105_3%",
+      Well %in% c("F7","F8","F9") ~ "A909_D105_5%",
       
       TRUE ~ NA_character_
+    ),
+     Replicate = case_when(
+      Well %in% c("D4","D7","D10") ~ "R1",
+      Well %in% c("E4","E7","E10") ~ "R2",
+      Well %in% c("F1","F4","F7") ~ "R3",
+      Well %in% c("D5","D8","D6") ~ "R4",
+      Well %in% c("E5","E8","E11") ~ "R5",
+      Well %in% c("F2","F5","F8") ~ "R6",
+      Well %in% c("D6","D9","D12") ~ "R7",
+      Well %in% c("E6","E9","E12") ~ "R8",
+      Well %in% c("F3","F6","F9") ~ "R9",
+      TRUE ~ NA_character_
     )
-  ) %>%
-  filter(!is.na(Condition)) %>%
-  mutate(time_hours = as.numeric(hms::as_hms(time)) / 3600) %>%
+  ) |>
+  filter(!is.na(Condition))
+
+# Convert time (BLEACH)
+dat_long_ethanol <- dat_long_ethanol |>
+  mutate(time_hours = as.numeric(hms::as_hms(time)) / 3600) |>
   filter(!is.na(time_hours))
 
 # summary
