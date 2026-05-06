@@ -44,18 +44,18 @@ dat_long <- dat %>%
 dat_long_bleach <- dat_long |>
   mutate(
     Condition = case_when(
-      Well %in% c("A1","A2","A3") ~ "A909_un",
+      Well %in% c("A1","A2","A3") ~ "A909_Untreated",
       Well %in% c("A4","A5","A6") ~ "A909_50ppm",
       Well %in% c("A7","A8","A9") ~ "A909_100ppm",
       Well %in% c("A10","A11","A12") ~ "A909_200ppm",
-      Well %in% c("B1","B2","B3") ~ "A909_D75_un",
-      Well %in% c("B4","B5","B6") ~ "A909_D75_50ppm",
-      Well %in% c("B7","B8","B9") ~ "A909_D75_100ppm",
-      Well %in% c("B10","B11","B12") ~ "A909_D75_200ppm",
-      Well %in% c("C1","C2","C3") ~ "A909_D105_un",
-      Well %in% c("C4","C5","C6") ~ "A909_D105_50ppm",
-      Well %in% c("C7","C8","C9") ~ "A909_D105_100ppm",
-      Well %in% c("C10","C11","C12") ~ "A909_D105_200",
+      Well %in% c("B1","B2","B3") ~ "D74_Untreated",
+      Well %in% c("B4","B5","B6") ~ "D74_50ppm",
+      Well %in% c("B7","B8","B9") ~ "D74_100ppm",
+      Well %in% c("B10","B11","B12") ~ "D74_200ppm",
+      Well %in% c("C1","C2","C3") ~ "D105_Untreated",
+      Well %in% c("C4","C5","C6") ~ "D105_50ppm",
+      Well %in% c("C7","C8","C9") ~ "D105_100ppm",
+      Well %in% c("C10","C11","C12") ~ "D105_200",
       TRUE ~ NA_character_
     ),
     Replicate = case_when(
@@ -91,40 +91,48 @@ summary_data_bleach <- dat_long_bleach |>
 
 # Plot 1 (BLEACH)
 ggplot(summary_data_bleach, aes(x = time_hours, y = mean_OD, color = Condition)) +
-  geom_line(size = 1.2) +
-  geom_ribbon(aes(ymin = mean_OD - se_OD, ymax = mean_OD + se_OD, fill = Condition),
-              alpha = 0.09, color = NA) +
-  theme_classic() +
+  geom_line(linewidth = 0.7, alpha = 0.5) +
+  geom_point(size = 1.3, alpha = 0.8) +
+  geom_smooth(se = FALSE, linewidth = 1.3, span = 0.25) +
+  geom_ribbon(
+    aes(ymin = mean_OD - se_OD, ymax = mean_OD + se_OD, fill = Condition),
+    alpha = 0.04,
+    color = NA
+  ) +
+  theme_classic(base_size = 13) +
+  theme(
+    legend.position = "right",
+    plot.title = element_text(face = "bold", hjust = 0.5)
+  ) +
   labs(
-    title = "GBS Growth Curve (Bleach)",
+    title = "GBS Growth Curves For Bleach",
     x = "Time (hours)",
     y = "OD600"
   )
-
 ggsave("figure/Bleach_Treatment_Growth_Curve.png", width = 6, height = 4, dpi = 1200)
 
 # ETHANOL ANALYSIS
 dat_long_ethanol <- dat_long %>%
   mutate(
     Condition = case_when(
-      Well %in% c("A1","A2","A3") ~ "A909_un",
+      Well %in% c("A1","A2","A3") ~ "A909_Untreated",
       Well %in% c("D4","D5","D6") ~ "A909_2%",
       Well %in% c("D7","D8","D9") ~ "A909_3%",
       Well %in% c("D10","D11","D12") ~ "A909_5%",
       
-      Well %in% c("B1","B2","B3") ~ "A909_D75_un",
-      Well %in% c("E4","E5","E6") ~ "A909_D74_2%",
-      Well %in% c("E7","E8","E9") ~ "A909_D74_3%",
-      Well %in% c("E10","E11","E12") ~ "A909_D74_5%",
+      Well %in% c("B1","B2","B3") ~ "D74_Untreated",
+      Well %in% c("E4","E5","E6") ~ "D74_2%",
+      Well %in% c("E7","E8","E9") ~ "D74_3%",
+      Well %in% c("E10","E11","E12") ~ "D74_5%",
       
-      Well %in% c("C1","C2","C3") ~ "A909_D105_un",
-      Well %in% c("F1","F2","F3") ~ "A909_D105_2%",
-      Well %in% c("F4","F5","F6") ~ "A909_D105_3%",
-      Well %in% c("F7","F8","F9") ~ "A909_D105_5%",
+      Well %in% c("C1","C2","C3") ~ "D105_Untreated",
+      Well %in% c("F1","F2","F3") ~ "D105_2%",
+      Well %in% c("F4","F5","F6") ~ "D105_3%",
+      Well %in% c("F7","F8","F9") ~ "D105_5%",
       
       TRUE ~ NA_character_
     ),
-     Replicate = case_when(
+    Replicate = case_when(
       Well %in% c("A1","D4","D7","D10") ~ "R1",
       Well %in% c("B1","E4","E7","E10") ~ "R2",
       Well %in% c("C1","F1","F4","F7") ~ "R3",
@@ -157,12 +165,21 @@ summary_ethanol <- dat_long_ethanol %>%
 
 # Plot 2 (ETHANOL)
 ggplot(summary_ethanol, aes(x = time_hours, y = mean_OD, color = Condition)) +
-  geom_line(size = 1.2) +
-  geom_ribbon(aes(ymin = mean_OD - se_OD, ymax = mean_OD + se_OD, fill = Condition),
-              alpha = 0.09, color = NA) +
-  theme_classic() +
+  geom_line(linewidth = 0.7, alpha = 0.5) +
+  geom_point(size = 1.3, alpha = 0.8) +
+  geom_smooth(se = FALSE, linewidth = 1.3, span = 0.25) +
+  geom_ribbon(
+    aes(ymin = mean_OD - se_OD, ymax = mean_OD + se_OD, fill = Condition),
+    alpha = 0.04,
+    color = NA
+  ) +
+  theme_classic(base_size = 13) +
+  theme(
+    legend.position = "right",
+    plot.title = element_text(face = "bold", hjust = 0.5)
+  ) +
   labs(
-    title = "GBS Ethanol Growth Curve",
+    title = "GBS Growth Curves For Ethanol",
     x = "Time (hours)",
     y = "OD600"
   )
@@ -173,20 +190,20 @@ ggsave("figure/Ethanol_Treatment_Growth_Curve.png", width = 6, height = 4, dpi =
 dat_long_pq <- dat_long %>%
   mutate(
     Condition = case_when(
-      Well %in% c("A1","A2","A3") ~ "A909_un",
+      Well %in% c("A1","A2","A3") ~ "A909_Untreated",
       Well %in% c("F10","F11","F12") ~ "A909_50PQ",
       Well %in% c("G1","G2","G3") ~ "A909_100PQ",
       Well %in% c("G4","G5","G6") ~ "A909_150PQ",
       
-      Well %in% c("B1","B2","B3") ~ "A909_D75_un",
-      Well %in% c("G7","G8","G9") ~ "A909_D74_50PQ",
-      Well %in% c("G10","G11","G12") ~ "A909_D74_100PQ",
-      Well %in% c("H1","H2","H3") ~ "A909_D74_150PQ",
+      Well %in% c("B1","B2","B3") ~ "D74_Untreated",
+      Well %in% c("G7","G8","G9") ~ "D74_50PQ",
+      Well %in% c("G10","G11","G12") ~ "D74_100PQ",
+      Well %in% c("H1","H2","H3") ~ "D74_150PQ",
       
-      Well %in% c("C1","C2","C3") ~ "A909_D105_un",
-      Well %in% c("H4","H5","H6") ~ "A909_D105_50PQ",
-      Well %in% c("H7","H8","H9") ~ "A909_D105_100PQ",
-      Well %in% c("H10","H11","H12") ~ "A909_D105_150PQ",
+      Well %in% c("C1","C2","C3") ~ "D105_Untreated",
+      Well %in% c("H4","H5","H6") ~ "D105_50PQ",
+      Well %in% c("H7","H8","H9") ~ "D105_100PQ",
+      Well %in% c("H10","H11","H12") ~ "D105_150PQ",
       
       TRUE ~ NA_character_
     ),
@@ -223,14 +240,21 @@ summary_pq <- dat_long_pq %>%
 
 # Plot 3 (PQ)
 ggplot(summary_pq, aes(x = time_hours, y = mean_OD, color = Condition)) +
-  geom_line(size = 1.2) +
+  geom_line(linewidth = 0.7, alpha = 0.5) +
+  geom_point(size = 1.3, alpha = 0.8) +
+  geom_smooth(se = FALSE, linewidth = 1.3, span = 0.25) +
   geom_ribbon(
     aes(ymin = mean_OD - se_OD, ymax = mean_OD + se_OD, fill = Condition),
-    alpha = 0.09, color = NA
+    alpha = 0.04,
+    color = NA
   ) +
-  theme_classic() +
+  theme_classic(base_size = 13) +
+  theme(
+    legend.position = "right",
+    plot.title = element_text(face = "bold", hjust = 0.5)
+  ) +
   labs(
-    title = "GBS PQ Growth Curve",
+    title = "GBS Growth Curves For PQ",
     x = "Time (hours)",
     y = "OD600"
   )
@@ -254,11 +278,28 @@ combined_summary <- bind_rows(
 )
 # Plot 4 (Combined)
 ggplot(combined_summary, aes(x = time_hours, y = mean_OD, color = Condition)) +
-  geom_line(size = 1.1) +
-  geom_ribbon(aes(ymin = mean_OD - se_OD, ymax = mean_OD + se_OD, fill = Condition),
-              alpha = 0.08, color = NA) +
-  facet_wrap(~Treatment) +
-  theme_classic() +
+  geom_line(linewidth = 0.7, alpha = 0.5) +
+  geom_point(size = 1.3, alpha = 0.8) +
+  geom_smooth(
+    se = FALSE,
+    linewidth = 1.3,
+    span = 0.25   # smaller = tighter curve (adjust 0.2–0.4)
+  ) +
+  geom_ribbon(
+    aes(ymin = mean_OD - se_OD, ymax = mean_OD + se_OD, fill = Condition),
+    alpha = 0.04,
+    color = NA
+  ) +
+  
+  facet_wrap(~Treatment, scales = "free_y") +
+  
+  theme_classic(base_size = 13) +
+  theme(
+    legend.position = "right",
+    strip.text = element_text(face = "bold"),
+    plot.title = element_text(face = "bold", hjust = 0.5)
+  ) +
+  
   labs(
     title = "GBS Growth Curves Across Treatments",
     x = "Time (hours)",
