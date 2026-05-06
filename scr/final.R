@@ -235,3 +235,33 @@ ggplot(summary_pq, aes(x = time_hours, y = mean_OD, color = Condition)) +
     y = "OD600"
   )
 ggsave("figure/PQ_Treatment_Growth_Curve.png", width = 6, height = 4, dpi = 1200)
+
+# Add a Treatment label
+summary_data_bleach <- summary_data_bleach %>%
+  mutate(Treatment = "Bleach")
+
+summary_ethanol <- summary_ethanol %>%
+  mutate(Treatment = "Ethanol")
+
+summary_pq <- summary_pq %>%
+  mutate(Treatment = "PQ")
+
+#Combine
+combined_summary <- bind_rows(
+  summary_data_bleach,
+  summary_ethanol,
+  summary_pq
+)
+# Plot 4 (Combined)
+ggplot(combined_summary, aes(x = time_hours, y = mean_OD, color = Condition)) +
+  geom_line(size = 1.1) +
+  geom_ribbon(aes(ymin = mean_OD - se_OD, ymax = mean_OD + se_OD, fill = Condition),
+              alpha = 0.08, color = NA) +
+  facet_wrap(~Treatment) +
+  theme_classic() +
+  labs(
+    title = "GBS Growth Curves Across Treatments",
+    x = "Time (hours)",
+    y = "OD600"
+  )
+ggsave("figure/Combined.png", width = 18, height = 4, dpi = 1200)
