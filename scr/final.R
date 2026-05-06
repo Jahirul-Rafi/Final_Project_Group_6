@@ -99,6 +99,8 @@ ggplot(summary_data, aes(x = time_hours, y = mean_OD, color = Condition)) +
     y = "OD600"
   )
 
+ggsave("figure/Bleach_Treatment_Growth_Curve.png", width = 6, height = 4, dpi = 1200)
+
 # ETHANOL ANALYSIS
 dat_long_ethanol <- dat_long %>%
   mutate(
@@ -144,6 +146,8 @@ ggplot(summary_ethanol, aes(x = time_hours, y = mean_OD, color = Condition)) +
     x = "Time (hours)",
     y = "OD600"
   )
+
+ggsave("figure/Ethanol_Treatment_Growth_Curve.png", width = 6, height = 4, dpi = 1200)
 
 #PQ ANALYSIS
 dat_long_pq <- dat_long %>%
@@ -193,3 +197,4 @@ ggplot(summary_pq, aes(x = time_hours, y = mean_OD, color = Condition)) +
     x = "Time (hours)",
     y = "OD600"
   )
+ggsave("figure/PQ_Treatment_Growth_Curve.png", width = 6, height = 4, dpi = 1200)
